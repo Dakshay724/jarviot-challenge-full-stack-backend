@@ -8,5 +8,4 @@ const {
 router.get("/auth", googleAuth);
 router.get("/G-drive", googleDrive);
 router.get("/revokeDriveToken", revokeDriveToken);
-
 module.exports = router;
