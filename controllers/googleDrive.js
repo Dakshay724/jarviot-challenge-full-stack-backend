@@ -1,8 +1,4 @@
 const Tokens = require("../models/googleDrive");
-const {
-  createErrorHandler,
-  createResponseHandler,
-} = require("../helpers/responseHelper");
 const { oauth2Client, google, Sequelize } = require("../config/config");
 
 const googleAuth = (req, res) => {
@@ -123,13 +119,10 @@ const revokeDriveToken = async (req, res) => {
         data: "",
       });
     }
-
-    const token = {
+    oauth2Client.setCredentials({
       access_token: tokens.access_token,
       refresh_token: tokens.refresh_token,
-    };
-
-    await oauth2Client.revokeToken(token);
+    });
 
     await Tokens.update(
       {
@@ -139,12 +132,14 @@ const revokeDriveToken = async (req, res) => {
       {
         where: {
           [Sequelize.Op.or]: [
-            { access_token: access_token },
-            { refresh_token: refresh_token },
+            { access_token: tokens.access_token },
+            { refresh_token: tokens.refresh_token },
           ],
         },
       }
     );
+
+    await oauth2Client.revokeToken(tokens.access_token);
 
     return res.status(200).json({
       status: 200,
